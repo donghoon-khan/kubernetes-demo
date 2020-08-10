@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: demo
+  name: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: demo
+    spec:
+      containers:
+      - image: dhkang222/kubernetes-spring:demo
+        name: kubernetes-spring
+        ports:
+          - name: demo-svc-8080
+            containerPort: 8080
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: demo-svc-8080
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: demo-svc-8080
+        startupProbe:
+          httpGet:
+            path: /actuator/health
+            port: demo-svc-8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: demo
+  name: demo
+spec:
+  ports:
+  - name: demo-svc-8080
+    port: 8080
+    protocol: TCP
+    nodePort: 31111
+    targetPort: 8080
+  selector:
+    app: demo
+  type: NodePort
